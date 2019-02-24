@@ -4,15 +4,16 @@ data.container:
     container_name: data.container
     volumes:
     - ./shared:/shared
+    - ./shared/sites:/etc/nginx/conf.d/
 
 # Account MySQL container
-mysql.database:
-  image: mysql
-  container_name: mysql.database
-  hostname: mysql.database
-  restart: always  
+mysql.gsg:
+  image: mysql:5.7
+  container_name: mysql.gsg
+  hostname: mysql.gsg
+  restart: always
   environment:
-    MYSQL_ROOT_PASSWORD: tHezUfru#7E=e2Ud#
+    MYSQL_ROOT_PASSWORD: root
     # Uncomment if need create database and custom user on container first run
     #MYSQL_DATABASE: DBNAME
     #MYSQL_USER: USER
@@ -20,18 +21,18 @@ mysql.database:
   ports:
     - "3306:3306"
   volumes:
-    - ./shared/databases/mysql:/var/lib/mysql    
+    - ./shared/databases/mysql:/var/lib/mysql
     - ./shared/config/mysql:/etc/mysql/conf.d
 
 # Account PHP5-FPM container
-example.dev:
-  image: xaamin/php-fpm
-  container_name: example.dev
-  hostname: example.dev
+doctors.stg:
+  image: xaamin/php-fpm:7.1
+  container_name: doctors.stg
+  hostname: doctors.stg
   restart: always
   environment:
     # Domain to serve as upstream
-    ACCOUNT: example.dev
+    ACCOUNT: doctors.stg
     # Customize some resource limits. You'll see defaults
     DATE_TIMEZONE: America/Mexico_City
     REQUEST_TIMEOUT: 60
@@ -39,22 +40,23 @@ example.dev:
     MEMORY_LIMIT: 128M
     POST_MAX_SIZE: 30M
   links:
-    - mysql.database
+    - mysql.gsg
   volumes:
-    - ./shared/example.dev:/shared/example.dev
-    - ./shared/example.dev/conf/php.ini:/etc/php/7.0/fpm/conf.d/10-custom_php.ini
-    - ./shared/example.dev/conf/php_cli.ini:/etc/php/7.0/cli/conf.d/10-custom_php.ini
+    - ./shared/doctors.stg:/shared/doctors.stg
+    - ./shared/doctors.stg/conf/php.ini:/etc/php/7.1/fpm/conf.d/10-custom_php.ini
+    - ./shared/doctors.stg/conf/php_cli.ini:/etc/php/7.1/cli/conf.d/10-custom_php.ini
 
 # NGinx
-nginx.web:
+nginx:
   image: xaamin/nginx
-  container_name: nginx.web
-  hostname: nginx.web
+  container_name: nginx
+  hostname: nginx
   restart: always
   ports:
     - "80:80"
     - "443:443"
   links:
-    - example.dev
+    # - example.dev
+    - doctors.stg
   volumes_from:
     - data.container

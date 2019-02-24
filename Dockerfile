@@ -1,4 +1,4 @@
-FROM xaamin/ubuntu:16.04
+FROM xaamin/ubuntu:18.04
 
 MAINTAINER "Benjamín Martínez Mateos" <xaamin@outlook.com>
 
@@ -7,14 +7,15 @@ RUN apt-get -y update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get -y install \
 		nginx \
 		libfcgi0ldbl \
-	
-	# Remove temp files	
+
+	# Remove temp files
 	&& apt-get clean \
 	&& apt-get -y autoremove \
 	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add bootstrap file
 ADD /root/.scripts /root/.scripts
+ADD ./root/.scripts /root/.scripts
 
 # Add supervisor config file
 ADD supervisord.conf /etc/supervisor/supervisord.conf
